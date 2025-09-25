@@ -286,5 +286,4 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   );
 }
 
-export { DashboardLayout };
 export default DashboardLayout;

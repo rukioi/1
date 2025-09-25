@@ -24,7 +24,7 @@ import Notifications from '@/pages/Notifications';
 import NotFound from '@/pages/NotFound';
 
 // Layout
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
+import DashboardLayout from '@/components/Layout/DashboardLayout';
 
 const queryClient = new QueryClient({
   defaultOptions: {
