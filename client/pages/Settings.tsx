@@ -1008,5 +1008,3 @@ export default function Settings() {
     </DashboardLayout>
   );
 }
-
-export default Settings;

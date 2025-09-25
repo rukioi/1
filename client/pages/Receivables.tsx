@@ -1283,5 +1283,3 @@ export default function Receivables() {
     </DashboardLayout>
   );
 }
-
-export default Receivables;

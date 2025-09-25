@@ -980,5 +980,3 @@ export default function CRM() {
     </DashboardLayout>
   );
 }
-
-export default CRM;
