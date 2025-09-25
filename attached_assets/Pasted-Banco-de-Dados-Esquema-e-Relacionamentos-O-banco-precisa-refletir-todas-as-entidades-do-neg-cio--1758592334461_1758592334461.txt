@@ -1,0 +1,65 @@
+Banco de Dados – Esquema e Relacionamentos
+
+O banco precisa refletir todas as entidades do negócio:
+
+Tabelas de Admin (Global): Com base no schema Prisma (e supabase), você deve ter pelo menos as seguintes tabelas no schema público:
+
+tenants: id, name, schema_name, plan_type, max_users, max_storage, is_active, created_at, updated_at. Chave primária id. Índice em schema_name (único). Cada tenant pode ter vários usuários e chaves de registro.
+
+users: id, email, password, name, account_type, tenant_id (fk para tenants.id), must_change_password, last_login, is_active, created_at, updated_at. Índice em tenant_id. Relação many-to-one com tenants (delete Cascade).
+
+registration_keys: id, key_hash, tenant_id (opcional, fk→tenants.id), account_type, uses_allowed, uses_left, single_use, expires_at, revoked, created_by, used_logs, created_at. Chaves estrangeiras apontam para tenants (cascade delete). Usuários podem usar essas chaves ao se cadastrar.
+
+refresh_tokens: id, token_hash, user_id (fk→users.id), expires_at, is_active, created_at.
+
+audit_logs: id, tenant_id, user_id, action, entity, timestamp【17†L20-L?】.
+
+system_logs: id, tenant_id (fk→tenants.id), action, entity, log_date, log_info, created_at.
+
+tenant_api_configs: id, tenant_id (fk→tenants.id), whatsapp_api_key, stripe_secret_key, etc., is_active, created_at, updated_at.
+
+As relações são as seguintes (definidas no Prisma e que devem existir no BD):
+
+users.tenant_id → tenants.id
+
+registration_keys.tenant_id → tenants.id
+
+refresh_tokens.user_id → users.id
+
+system_logs.tenant_id → tenants.id
+
+tenant_api_configs.tenant_id → tenants.id
+
+Certifique-se que o esquema Prisma e migrações foram aplicadas. O arquivo de migração migration.sql (prisma) lista criação de tipos (AccountType) e todas essas tabelas (veja trecho no início: CREATE TABLE "public"."tenants" ... etc). Verifique se esses scripts rodaram no banco de produção.
+
+Tabela Admin_Users (Painel Admin): O código de login admin espera uma tabela admin_users no banco (usada pelo Supabase no findAdminByEmail). Essa tabela não aparece no schema Prisma. Ela foi sugerida num script de configuração rápida supabase (INSERT INTO admin_users ...). Crie essa tabela manualmente (ou converta para Prisma) com colunas email, password_hash, name, role. Sem isso, o login admin nunca encontrará o usuário.
+
+Schemas de Tenant (Multi-Tenancy): Cada tenant terá um schema dedicado (ex: tenant_abc123). Nesses schemas, devem existir tabelas de negócio:
+
+clients (clientes): id, name, email, phone, organization, address (jsonb), budget, currency, status, tags (jsonb), notes, cpf, rg, professional_title, marital_status, birth_date, created_by, created_at, updated_at, is_active. Há índices em name, email, etc.
+
+projects: id, name, description, client_id, status, progress, start_date, end_date, tags, created_by, created_at, updated_at, is_active (conforme service).
+
+tasks: ATENÇÃO – implementá-la: id, title, description, project_id, project_title, client_id, client_name, assigned_to, status, priority, start_date, end_date, estimated_hours, actual_hours, progress, tags, notes, created_by, created_at, updated_at, is_active. Provavelmente índices em status/priority.
+
+Relacionamentos: Se você vincular uma tarefa a projeto/cliente, considere chaves estrangeiras (project_id → projects.id, client_id → clients.id) dentro do schema do tenant.
+
+transactions: id, amount, type, category, date, description, created_by, created_at, updated_at, is_active. Relaciona-se possivelmente a conta? (Não há outra tabela de conta especificada, então é genérico.)
+
+invoices: id, amount, date, due_date, status, created_by, created_at, updated_at, is_active.
+
+notifications: id, title, message, type, payload (jsonb), link, user_id, is_read, created_at, is_active. Observação: O serviço cria a tabela com target_user_id (talvez chamado user_id). Essa tabela armazena notificações de sistema por usuário.
+
+publications: id, title, content, author_id, author_name, date, is_active, created_by, created_at, updated_at. (Conforme controllers, parece não haver criação via serviço – talvez seja tabela estática? Mas há um service, então crie também.)
+
+Outras tabelas: Verifique se há necessidade de tabelas adicionais – por exemplo, se cada tenant deve ter sua própria tabela de usuários. No esquema Prisma, os usuários são globais com referência a tenantId; nesse caso não haveria tabela tenant_xxxx.users. Mas se for multitenant total, você criaria, por tenant, uma tabela de users local, além da global? Seu código parece usar somente a tabela global users (vinculada ao tenantId), então possivelmente não há tabelas users nos schemas.
+
+Em resumo, o banco está quase completo, mas atenção:
+
+Falta implementar ativação do schema de tenant quando se cria um tenant (possível função Supabase pronta).
+
+Falta a tabela de tarefas nos schemas de tenant (no código, faltou inicialização).
+
+Confirme chaves estrangeiras (por exemplo, client_id em projetos/tarefas deve referenciar clients.id do mesmo schema).
+
+Certifique-se de índices sugeridos (nomes, e-mails, datas, etc.) para performance, como já estão nos serviços de criação.

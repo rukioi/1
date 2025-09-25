@@ -1,0 +1,13 @@
+Implementação de Lógica de Negócio Faltante
+
+Admin/Tenant (painel administrativo): Vários métodos no adminController atualmente retornam dados mockados em vez de usar o banco de dados real. Por exemplo, ao criar um tenant (POST /api/admin/tenants) o código só gera um objeto de exemplo e retorna sucesso, sem efetivamente inserir nada no BD. O mesmo ocorre para listar tenants e chaves de registro (registration keys). Em produção, você precisará implementar esses métodos para usar o banco:
+
+createTenant: Deve gerar um novo registro na tabela global tenants (no schema master), atribuir um schemaName único (por exemplo tenant_<uuid>), e invocar a criação física do schema e tabelas do tenant no PostgreSQL. O projeto inclui um script SQL de supabase que define uma função create_tenant_schema(tenant_uuid) – você poderia chamar essa função ou executar DDL correspondente (CREATE SCHEMA, CREATE TABLE, etc.) via tenantDB.executeInTenantSchema ou função em supabase.
+
+getTenants: Deve consultar a tabela tenants no banco e retornar a lista real de clientes (atualmente retorna array de mock).
+
+createRegistrationKey / getRegistrationKeys / revokeRegistrationKey: Em vez de valores fixos, use o serviço registrationKeyService ou direto Supabase/Prisma para manipular a tabela registration_keys. Ex.: registrationKeyService.generateKey() insere na tabela com hash do key. (Note que existe tanto migração Prisma para registration_keys quanto código supabase para ela; escolha um método consistente.)
+
+Admin/Auth: O adminAuthController usa corretamente authService.loginAdmin, que simula login de admin via tabela admin_users. O código supabase em config/database.ts contempla findAdminByEmail, mas certifique-se de ter a tabela admin_users populada. Em desenvolvimento isso é mock, mas em produção insira um usuário admin no banco (o script supabase sugere inserir um admin padrão).
+
+Users Normais (Tenant Users): Para registro e login de usuários finais, o authService verifica chave de registro válida, cria usuário e tokens. Há serviço usersService (talvez não explicitado), mas validadores estão em authService.registerUser. Confirme que há uma tabela de usuários (users), conforme o esquema Prisma, e que o login/senha funcione. OBS: O modelo Prisma User não tem campo role, mas o código JWT inclui role apenas se presente (somente admins). Isso está OK, mas lembre-se: usuários normais recebem accountType no token (usado por requireAccountType para restrições).

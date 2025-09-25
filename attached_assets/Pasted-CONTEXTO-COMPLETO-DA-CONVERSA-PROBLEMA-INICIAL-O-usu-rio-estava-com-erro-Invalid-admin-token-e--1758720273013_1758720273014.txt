@@ -1,0 +1,42 @@
+CONTEXTO COMPLETO DA CONVERSA:
+PROBLEMA INICIAL: O usuário estava com erro "Invalid admin token" e "Server error: 404" ao tentar criar Registration Keys.
+
+SOLUÇÕES IMPLEMENTADAS:
+
+Corrigimos o sistema de autenticação admin - Ajustamos o middleware de auth, authService e os componentes do admin para funcionar corretamente com tokens JWT.
+
+Corrigimos as rotas e controllers admin - Implementamos todas as rotas necessárias (/admin/registration-keys) e seus controllers correspondentes.
+
+Corrigimos o banco de dados - Ajustamos as operações CRUD para Registration Keys usando Prisma corretamente.
+
+Corrigimos o Vite - O preview parou de funcionar devido a configuração de hosts. Ajustamos o vite.config.ts com:
+
+allowedHosts para aceitar o domínio do Replit
+Configuração correta de CORS e HMR
+Porta 5000 configurada adequadamente
+Corrigimos o fluxo de registro - O usuário conseguia criar Registration Keys mas não conseguia usar para registrar usuários devido a:
+
+Erro de comparação de hash das chaves
+Problema nos nomes de campos do Prisma (snake_case vs camelCase)
+ARQUIVOS MODIFICADOS:
+
+src/middleware/auth.ts - Autenticação admin
+src/services/authService.ts - Lógica de login/registro e validação de chaves
+admin/components/AdminLayout.tsx - Interface admin
+admin/pages/Dashboard.tsx - Dashboard admin
+admin/hooks/useAdminAuth.tsx - Hook de autenticação
+src/routes/admin.ts - Rotas administrativas
+src/controllers/adminController.ts - Controllers admin
+src/config/database.ts - Operações de banco de dados
+admin/hooks/useAdminApi.tsx - API calls do admin
+admin/pages/RegistrationKeys.tsx - Interface de chaves de registro
+vite.config.ts - Configuração do Vite para Replit
+scripts/test-registration-flow.js - Script de teste
+ERRO ATUAL CORRIGIDO: O Prisma estava recebendo campos em snake_case (schema_name, plan_type) mas esperava camelCase (schemaName, planType). Corrigimos os métodos createTenant e createUser no database.ts e ajustamos o authService.ts para usar os nomes corretos.
+
+ESTADO ATUAL: O sistema agora deve permitir:
+
+Login no painel admin
+Criação de Registration Keys
+Uso dessas chaves para registro de usuários
+Login dos usuários registrados
