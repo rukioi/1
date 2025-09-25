@@ -99,7 +99,7 @@ const getStatusConfig = (status: PublicationStatus) => {
   return statusConfigs[status];
 };
 
-export default function PublicationDetail() {
+function PublicationDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [showTaskForm, setShowTaskForm] = useState(false);
@@ -379,3 +379,5 @@ export default function PublicationDetail() {
     </DashboardLayout>
   );
 }
+
+export default PublicationDetail;

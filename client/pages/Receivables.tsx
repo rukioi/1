@@ -328,7 +328,7 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-export default function Receivables() {
+function Receivables() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([]);
@@ -1283,3 +1283,5 @@ export default function Receivables() {
     </DashboardLayout>
   );
 }
+
+export default Receivables;

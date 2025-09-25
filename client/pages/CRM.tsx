@@ -278,7 +278,7 @@ function PipelineListView({
   );
 }
 
-export default function CRM() {
+function CRM() {
   const [activeTab, setActiveTab] = useState("clients");
   const [showClientForm, setShowClientForm] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -980,3 +980,5 @@ export default function CRM() {
     </DashboardLayout>
   );
 }
+
+export default CRM;

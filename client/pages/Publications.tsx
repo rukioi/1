@@ -162,7 +162,7 @@ const getUrgencyColor = (urgencia?: string) => {
   }
 };
 
-export default function Publications() {
+function Publications() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(false);
@@ -1019,3 +1019,5 @@ export default function Publications() {
     </DashboardLayout>
   );
 }
+
+export default Publications;

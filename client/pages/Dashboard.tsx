@@ -121,7 +121,7 @@ function MetricCard({
   );
 }
 
-export default function Dashboard() {
+function Dashboard() {
   const navigate = useNavigate();
   const { metrics, recentActivity, chartData, isLoading, error } = useDashboard();
 
@@ -403,3 +403,5 @@ export default function Dashboard() {
     </DashboardLayout>
   );
 }
+
+export default Dashboard;

@@ -333,7 +333,7 @@ function TasksListView({
   );
 }
 
-export default function Tasks() {
+function Tasks() {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [showTaskView, setShowTaskView] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
@@ -765,3 +765,5 @@ export default function Tasks() {
     </DashboardLayout>
   );
 }
+
+export default Tasks;
