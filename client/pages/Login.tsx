@@ -10,27 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Scale, Eye, EyeOff, Mail, Lock, User, Key } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-// Assuming useAuth is in a file like '@/hooks/useAuth'
-// import { useAuth } from '@/hooks/useAuth';
-
-// Placeholder for the useAuth hook if it's not provided
-const useAuth = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const login = async (credentials: any) => {
-    console.log("Simulating login:", credentials);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // Simulate successful login
-    setIsAuthenticated(true);
-    return { success: true };
-  };
-  const register = async (userData: any) => {
-    console.log("Simulating register:", userData);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // Simulate successful registration
-    return { success: true, user: { accountType: 'user' } };
-  };
-  return { login, register, isAuthenticated };
-};
+import { useAuth } from '@/hooks/useAuth';
 
 
 const loginSchema = z.object({
