@@ -33,16 +33,16 @@ export class AuthService {
     };
 
     const accessToken = jwt.sign(payload, this.accessTokenSecret, { 
-      expiresIn: process.env.JWT_ACCESS_EXPIRES || '24h',
+      expiresIn: (process.env.JWT_ACCESS_EXPIRES || '24h') as string,
       issuer: 'legalsaas',
       audience: 'legalsaas-users'
-    });
+    } as any);
     
     const refreshToken = jwt.sign(payload, this.refreshTokenSecret, { 
-      expiresIn: process.env.JWT_REFRESH_EXPIRES || '7d',
+      expiresIn: (process.env.JWT_REFRESH_EXPIRES || '7d') as string,
       issuer: 'legalsaas',
       audience: 'legalsaas-users'
-    });
+    } as any);
 
     // Store refresh token in database
     const tokenHash = await bcrypt.hash(refreshToken, 10);
@@ -198,23 +198,21 @@ export class AuthService {
   }
 
   async registerUser(email: string, password: string, name: string, key: string) {
-    // Validate registration key
+    // Validate registration key first
     const validKeys = await database.findValidRegistrationKeys();
-    console.log('Available keys:', validKeys.length);
-    console.log('Looking for key:', key.substring(0, 8) + '...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Found valid registration keys:', validKeys.length);
+    }
     
     let registrationKey = null;
     
     // Try to find a matching key by comparing the plain key with stored hashes
     for (const validKey of validKeys) {
       try {
-        console.log('Comparing with key ID:', validKey.id, 'hash preview:', validKey.keyHash ? validKey.keyHash.substring(0, 10) + '...' : 'null');
-        
-        // Use the correct field name based on Prisma schema
-        const keyHashField = validKey.keyHash;
-        
-        if (keyHashField && await bcrypt.compare(key, keyHashField)) {
-          console.log('Key match found for ID:', validKey.id);
+        if (validKey.keyHash && await bcrypt.compare(key, validKey.keyHash)) {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Key match found for ID:', validKey.id);
+          }
           registrationKey = validKey;
           break;
         }
@@ -225,15 +223,16 @@ export class AuthService {
     }
 
     if (!registrationKey) {
-      console.log('Registration key not found. Provided key:', key.substring(0, 8) + '...');
-      console.log('Available key hashes:', validKeys.map(k => ({ 
-        id: k.id, 
-        hashPreview: k.keyHash?.substring(0, 10) + '...' 
-      })));
       throw new Error('Invalid or expired registration key');
     }
 
     console.log('Valid registration key found:', registrationKey.id);
+    
+    // CRITICAL: Check if key has mandatory tenantId
+    if (!registrationKey.tenantId) {
+      console.error('Registration key missing required tenantId:', registrationKey.id);
+      throw new Error('Invalid registration key - missing tenant association');
+    }
 
     // Check if user already exists
     const existingUser = await database.findUserByEmail(email);
@@ -246,29 +245,18 @@ export class AuthService {
     let tenant;
     let isNewTenant = false;
 
-    // Create or use existing tenant
-    if (registrationKey.tenantId) {
-      // Use existing tenant
-      const tenantsResult = await database.getAllTenants();
-      const tenants = Array.isArray(tenantsResult) ? tenantsResult : tenantsResult.rows || [];
-      tenant = tenants.find(t => t.id === registrationKey.tenantId);
-      if (!tenant) {
-        throw new Error('Associated tenant not found');
-      }
-    } else {
-      // Create new tenant
-      tenant = await database.createTenant({
-        name: `${name}'s Law Firm`,
-        schemaName: `tenant_${Date.now()}`,
-        planType: 'basic',
-        isActive: true,
-        maxUsers: 5,
-        maxStorage: 1073741824, // 1GB
-      });
-      isNewTenant = true;
+    // Get existing tenant (tenantId is now mandatory)
+    const tenantsResult = await database.getAllTenants();
+    const tenants = Array.isArray(tenantsResult) ? tenantsResult : tenantsResult.rows || [];
+    tenant = tenants.find(t => t.id === registrationKey.tenantId);
+    
+    if (!tenant) {
+      throw new Error('Associated tenant not found');
     }
+    
+    console.log('Using tenant:', { id: tenant.id, name: tenant.name });
 
-    // Create user
+    // Create user with explicit tenant association
     const userData = {
       email,
       password: hashedPassword,
@@ -278,8 +266,20 @@ export class AuthService {
       isActive: true,
       mustChangePassword: false,
     };
+    
+    console.log('Creating user with data:', { 
+      email: userData.email, 
+      tenantId: userData.tenantId, 
+      accountType: userData.accountType 
+    });
 
     const user = await database.createUser(userData);
+    
+    console.log('User created:', { 
+      id: user.id, 
+      tenantId: user.tenantId,
+      accountType: user.accountType
+    });
 
     // Update registration key usage
     const currentUsedLogs = registrationKey.usedLogs;
@@ -296,6 +296,8 @@ export class AuthService {
         }
       ]
     });
+    
+    console.log('Registration key usage updated successfully for ID:', registrationKey.id);
 
     const tokens = await this.generateTokens(user);
     
