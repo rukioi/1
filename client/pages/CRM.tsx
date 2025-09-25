@@ -3,7 +3,7 @@ import {
   createSafeOnOpenChange,
   createSafeDialogHandler,
 } from "@/lib/dialog-fix";
-import { DashboardLayout } from "@/components/Layout/DashboardLayout";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

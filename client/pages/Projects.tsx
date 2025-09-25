@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
+import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

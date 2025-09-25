@@ -130,3 +130,6 @@ export function useResizeObserverErrorHandler() {
     };
   }, []);
 }
+
+// Export default for compatibility
+export default UIErrorBoundary;

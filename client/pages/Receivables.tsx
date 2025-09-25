@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from "react";
-import { DashboardLayout } from "@/components/Layout/DashboardLayout";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { ImportBillingModal } from "@/components/Receivables/ImportBillingModal";
 import { InvoiceViewDialog } from "@/components/Receivables/InvoiceViewDialog";
 import { NewInvoiceModal } from "@/components/Receivables/NewInvoiceModal";

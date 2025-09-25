@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import { Toaster } from '@/components/ui/toaster';
-import { UIErrorBoundary as ErrorBoundary } from '@/lib/error-boundary';
+import ErrorBoundary from '@/lib/error-boundary';
 import '@/global.css';
 
 // Páginas
