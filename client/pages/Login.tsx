@@ -88,28 +88,17 @@ export function Login() {
       console.log('Attempting login with:', data.email);
 
       // Using the integrated useAuth hook's login function
-      const result = await login({ email: data.email, password: data.password });
+      await login(data.email, data.password);
 
-      if (result.success) {
-        // Assuming login function in useAuth handles token storage or provides them
-        // For this example, we'll simulate token storage if not handled by useAuth
-        if (result.tokens) {
-          localStorage.setItem('access_token', result.tokens.accessToken);
-          localStorage.setItem('refresh_token', result.tokens.refreshToken);
-        }
+      setSuccessMessage('Login realizado com sucesso! Redirecionando...');
 
-        setSuccessMessage('Login realizado com sucesso! Redirecionando...');
-
-        // Redirect to dashboard
-        setTimeout(() => {
-          navigate('/');
-        }, 1000);
-      } else {
-        setErrorMessage(result.error || 'Email ou senha incorretos');
-      }
+      // Redirect to dashboard
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
     } catch (error) {
       console.error('Login error:', error);
-      setErrorMessage('Erro ao conectar com servidor. Verifique sua conexão.');
+      setErrorMessage('Email ou senha incorretos');
     } finally {
       setIsLoading(false);
     }
@@ -121,25 +110,14 @@ export function Login() {
 
     try {
       // Using the integrated useAuth hook's register function
-      const result = await register({
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        key: data.key,
-      });
+      await register(data.email, data.password, data.name, data.key);
 
-      if (result.success) {
-        setSuccessMessage(
-          `Conta criada com sucesso! Você foi registrado como conta ${result.user.accountType}. Faça login para continuar.`
-        );
-        setActiveTab('login');
-        registerForm.reset();
-      } else {
-        setErrorMessage(result.error || 'Erro ao criar conta');
-      }
+      setSuccessMessage('Conta criada com sucesso! Faça login para continuar.');
+      setActiveTab('login');
+      registerForm.reset();
     } catch (error) {
       console.error('Register error:', error);
-      setErrorMessage('Erro ao conectar com servidor. Verifique sua conexão.');
+      setErrorMessage('Erro ao criar conta');
     } finally {
       setIsLoading(false);
     }
