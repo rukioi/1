@@ -4,7 +4,7 @@ import { database } from '../config/database';
 
 // Validation schemas
 const createKeySchema = z.object({
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.string().uuid('tenantId é obrigatório - chave deve estar vinculada a um tenant'),
   accountType: z.enum(['SIMPLES', 'COMPOSTA', 'GERENCIAL']),
   usesAllowed: z.number().int().min(1).optional(),
   expiresAt: z.string().datetime().optional(),
@@ -26,7 +26,7 @@ export class AdminController {
       console.log('Creating registration key with data:', req.body);
 
       const createKeySchema = z.object({
-        tenantId: z.string().uuid().optional(),
+        tenantId: z.string().uuid('tenantId é obrigatório - chave deve estar vinculada a um tenant'),
         accountType: z.enum(['SIMPLES', 'COMPOSTA', 'GERENCIAL']),
         usesAllowed: z.number().int().min(1).optional().default(1),
         expiresAt: z.string().datetime().optional(),
@@ -189,7 +189,7 @@ export class AdminController {
             planType: tenant.planType,
             isActive: tenant.isActive,
             maxUsers: tenant.maxUsers,
-            userCount: 0, // TODO: implementar contagem real de usuários
+            userCount: await this.getTenantUserCount(tenant.id),
             createdAt: tenant.createdAt,
             stats,
           };
@@ -318,6 +318,18 @@ export class AdminController {
       res.status(500).json({
         error: error instanceof Error ? error.message : 'Failed to toggle tenant status',
       });
+    }
+  }
+
+  // Helper method para contar usuários de um tenant
+  private async getTenantUserCount(tenantId: string): Promise<number> {
+    try {
+      const users = await database.getAllUsers();
+      const tenantUsers = users.rows.filter((user: any) => user.tenantId === tenantId);
+      return tenantUsers.length;
+    } catch (error) {
+      console.warn(`Error counting users for tenant ${tenantId}:`, error);
+      return 0;
     }
   }
 

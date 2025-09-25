@@ -66,8 +66,14 @@ export function RegistrationKeyForm({ open, onOpenChange, onSuccess }: Registrat
 
     try {
       setIsLoading(true);
+      // Validar se tenant foi selecionado
+      if (!formData.tenantId) {
+        setError('Tenant é obrigatório - a chave deve estar vinculada a um tenant');
+        return;
+      }
+
       const result = await createRegistrationKey({
-        tenantId: formData.tenantId || undefined,
+        tenantId: formData.tenantId,
         accountType: formData.accountType as any,
         usesAllowed: formData.usesAllowed,
         expiresAt: formData.expiresAt,
@@ -207,20 +213,22 @@ export function RegistrationKeyForm({ open, onOpenChange, onSuccess }: Registrat
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tenantId">Assign to Tenant (Optional)</Label>
+            <Label htmlFor="tenantId">Tenant *</Label>
             <Select value={formData.tenantId} onValueChange={(value) => handleInputChange('tenantId', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Create new tenant" />
+              <SelectTrigger className={!formData.tenantId ? 'border-red-300' : ''}>
+                <SelectValue placeholder="Selecione um tenant" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Create New Tenant</SelectItem>
                 {tenants.map((tenant) => (
                   <SelectItem key={tenant.id} value={tenant.id}>
-                    {tenant.name}
+                    {tenant.name} ({tenant.userCount || 0}/{tenant.maxUsers || 5} users)
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {!formData.tenantId && (
+              <p className="text-sm text-red-600">Tenant é obrigatório - a chave deve estar vinculada a um tenant</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -280,7 +288,7 @@ export function RegistrationKeyForm({ open, onOpenChange, onSuccess }: Registrat
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading || !formData.tenantId}>
               {isLoading ? 'Generating...' : 'Generate Key'}
             </Button>
           </div>

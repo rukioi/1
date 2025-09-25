@@ -26,8 +26,9 @@
  * Este layout garante consistência visual em todo o sistema.
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -62,16 +63,16 @@ import { UserProfileDialog } from "./UserProfileDialog";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { useDialogBodyFix } from "@/hooks/use-dialog-body-fix";
 
-const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "CRM", href: "/crm", icon: Users },
-  { name: "Projetos", href: "/projetos", icon: FolderKanban },
-  { name: "Tarefas", href: "/tarefas", icon: CheckSquare },
-  { name: "Cobrança", href: "/cobranca", icon: FileText },
-  { name: "Gestão de Recebíveis", href: "/recebiveis", icon: CreditCard },
-  { name: "Fluxo de Caixa", href: "/fluxo-caixa", icon: TrendingUp },
-  { name: "Painel de Publicações", href: "/publicacoes", icon: Newspaper },
-  { name: "Configurações", href: "/configuracoes", icon: Settings },
+const allNavigation = [
+  { name: "Dashboard", href: "/", icon: LayoutDashboard, requiredAccountTypes: ['SIMPLES', 'COMPOSTA', 'GERENCIAL'] },
+  { name: "CRM", href: "/crm", icon: Users, requiredAccountTypes: ['SIMPLES', 'COMPOSTA', 'GERENCIAL'] },
+  { name: "Projetos", href: "/projetos", icon: FolderKanban, requiredAccountTypes: ['SIMPLES', 'COMPOSTA', 'GERENCIAL'] },
+  { name: "Tarefas", href: "/tarefas", icon: CheckSquare, requiredAccountTypes: ['SIMPLES', 'COMPOSTA', 'GERENCIAL'] },
+  { name: "Cobrança", href: "/cobranca", icon: FileText, requiredAccountTypes: ['SIMPLES', 'COMPOSTA', 'GERENCIAL'] },
+  { name: "Gestão de Recebíveis", href: "/recebiveis", icon: CreditCard, requiredAccountTypes: ['SIMPLES', 'COMPOSTA', 'GERENCIAL'] },
+  { name: "Fluxo de Caixa", href: "/fluxo-caixa", icon: TrendingUp, requiredAccountTypes: ['COMPOSTA', 'GERENCIAL'] },
+  { name: "Painel de Publicações", href: "/publicacoes", icon: Newspaper, requiredAccountTypes: ['SIMPLES', 'COMPOSTA', 'GERENCIAL'] },
+  { name: "Configurações", href: "/configuracoes", icon: Settings, requiredAccountTypes: ['GERENCIAL'] },
 ];
 
 interface DashboardLayoutProps {
@@ -84,6 +85,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [navigation, setNavigation] = useState(allNavigation);
+
+  // Filter navigation based on user account type
+  useEffect(() => {
+    if (user?.accountType) {
+      const filteredNavigation = allNavigation.filter(item => 
+        item.requiredAccountTypes.includes(user.accountType)
+      );
+      setNavigation(filteredNavigation);
+    }
+  }, [user]);
 
   // Apply global dialog body freeze fix
   useDialogBodyFix();

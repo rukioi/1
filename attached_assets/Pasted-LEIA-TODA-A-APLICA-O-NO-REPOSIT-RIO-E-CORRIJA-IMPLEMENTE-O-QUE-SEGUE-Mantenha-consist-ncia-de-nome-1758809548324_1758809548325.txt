@@ -1,0 +1,71 @@
+LEIA TODA A APLICAÇÃO NO REPOSITÓRIO E CORRIJA/IMPLEMENTE O QUE SEGUE. Mantenha consistência de nomes e lógica: **reutilize funções e variáveis existentes**, evite duplicações e refatore quando necessário. Faça front-end e back-end completos, profissionais e testados. Lembre-se: este é um SaaS **multi-tenant** — TODOS os dados devem ser isolados por tenant.
+
+### Objetivo principal
+1. **Registration Keys** (Admin Panel) — ao criar uma key:
+   - A key **só pode ser gerada vinculada a um tenant** (obrigatório).
+   - A key deve salvar/ligar o `tenant_id`.
+   - Ao criar um usuário via key, atualizar o contador de usuários do tenant no painel administrativo: ex. `0/5` → `1/5`.
+   - Frontend (UI) + Backend (API, validação, DB) completos para criação, listagem, revogação e auditoria de keys.
+
+2. **Tipos de conta** — ao criar/atribuir contas, garantir atributos e restrições corretas:
+   - **Conta Simples**
+     - Dashboard: estatísticas de clientes (dados do CRM, projetos, tarefas, cobranças, gestão de recebíveis e painel de publicações).
+     - Gráficos financeiros **sempre zerados** (esses dados vêm do módulo `fluxo-caixa` e Conta Simples **não tem acesso**).
+     - Funcionalidades: CRM, Projetos, Tarefas básicas, CRUD completo.
+     - Restrição: **bloquear acesso ao módulo `fluxo-caixa`** (tanto UI quanto endpoints; retornar 403/unauthorized se tentar acessar).
+   - **Conta Composta**
+     - Dashboard: acesso completo a todos os gráficos.
+     - Funcionalidades: todos os módulos **exceto** Configurações (UI e endpoints de Configurações devem negar acesso).
+     - Permissões: completas salvo acesso a Configurações.
+   - **Conta Gerencial**
+     - Dashboard: acesso total + métricas avançadas.
+     - Funcionalidades: todos os módulos incluindo Configurações.
+     - Permissões: administração completa do tenant.
+
+3. **Comportamento Multi-tenant**
+   - Todas as consultas CRUD devem ser **isoladas por tenant** (middleware ou scope em queries).
+   - Um usuário de um tenant vê **apenas** os dados do seu tenant.
+   - A key de registro só valida/cria recursos dentro do tenant associado.
+
+### Requisitos técnicos (sugestão de endpoints e ações)
+- Backend:
+  - `POST /api/admin/registration-keys` — criar key (body inclui `tenant_id`, `tipo_conta`).
+  - `GET /api/admin/registration-keys` — listar keys por tenant.
+  - `POST /api/tenants/:tenantId/users/from-key` — criar usuário via key (incrementa contador).
+  - Middleware de autorização que verifica tenant_id e tipo de conta para `fluxo-caixa` e `configurations`.
+  - Migrations/alterações DB: tabela `registration_keys` com `id, key, tenant_id, tipo_conta, created_by, revoked_at, metadata`.
+  - Testes unitários e de integração para: criação de key, criação de usuário via key, isolamento por tenant, bloqueio de acesso a `fluxo-caixa` para Conta Simples, negação de Configurações para Conta Composta.
+- Frontend:
+  - Form de criação de key (selecionar tenant, tipo de conta).
+  - Exibição clara de vínculo da key ao tenant.
+  - Ao usuário criado por key, atualizar contador no painel (`0/5` → `1/5`) em tempo real.
+  - UX: avisos claros quando acesso for negado (403) por tipo de conta.
+- Segurança & boas práticas:
+  - Key deve ser gerada com entropia segura e armazenada hasheada se for segredo usável.
+  - Logs/auditoria para criação/uso/revogação de keys.
+  - Validações no backend (sanitização, tipos).
+  - Rate limiting nas rotas de criação de keys e criação de usuários.
+
+### Critérios de aceite (must pass)
+- Ao criar uma Registration Key, o registro contém `tenant_id` e a key funciona apenas para esse tenant.
+- Usuário criado via key incrementa o contador visível no Admin Panel.
+- Conta Simples não consegue acessar qualquer endpoint/UI do módulo `fluxo-caixa` (resposta 403).
+- Conta Composta não consegue acessar Configurações (resposta 403).
+- Conta Gerencial tem acesso completo.
+- Testes automatizados cobrem os casos acima e passam.
+- Código refatorado reutiliza funções/variáveis quando possível; sem duplicações óbvias; nomes claros e consistentes.
+- Migrations e documentação (README/CHANGELOG) atualizadas com as mudanças.
+
+### Entregáveis esperados
+1. Código fonte (front + back) com commits claros e mensagens descritivas.
+2. Branch/PR com resumo das alterações.
+3. Scripts de migration e seed (se aplicável).
+4. Testes automatizados e instruções para rodá-los localmente.
+5. Checklist de QA e lista de endpoints afetados.
+6. Changelog curto e instruções de deploy.
+
+### Observações para o Agent
+- Se precisar modificar nomes de funções/variáveis, atualize todas as referências e adicione um commit de refactor separado.
+- Se houver documentação ou tickets relacionados no repositório, linke-os no PR.
+- Priorize segurança de keys e isolamento multi-tenant.
+- Antes de aplicar mudanças ao main, gere um PR e descreva claramente o que foi alterado e por quê.
