@@ -71,7 +71,7 @@ interface DetailedNotification {
   updatedAt: Date;
 }
 
-export function Notifications() {
+export default function Notifications() {
   const navigate = useNavigate();
   const {
     notifications,

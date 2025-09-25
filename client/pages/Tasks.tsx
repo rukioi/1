@@ -333,7 +333,7 @@ function TasksListView({
   );
 }
 
-export function Tasks() {
+export default function Tasks() {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [showTaskView, setShowTaskView] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();

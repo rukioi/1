@@ -294,7 +294,7 @@ function ProjectCompactView({
   );
 }
 
-export function Projects() {
+export default function Projects() {
   const [activeTab, setActiveTab] = useState('kanban');
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [showProjectView, setShowProjectView] = useState(false);

@@ -206,7 +206,7 @@ const mockTransactions: Transaction[] = [
   },
 ];
 
-export function CashFlow() {
+export default function CashFlow() {
   // Estados principais do componente
   const [activeTab, setActiveTab] = useState('all');
   const [showTransactionForm, setShowTransactionForm] = useState(false);
