@@ -59,13 +59,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    const response = await apiService.login(email, password);
-    setUser(response.user);
+    try {
+      const response = await apiService.login(email, password);
+      setUser(response.user);
+      localStorage.setItem('access_token', response.tokens.accessToken);
+      localStorage.setItem('refresh_token', response.tokens.refreshToken);
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   };
 
   const register = async (email: string, password: string, name: string, key: string) => {
-    const response = await apiService.register(email, password, name, key);
-    setUser(response.user);
+    try {
+      const response = await apiService.register(email, password, name, key);
+      setUser(response.user);
+      localStorage.setItem('access_token', response.tokens.accessToken);
+      localStorage.setItem('refresh_token', response.tokens.refreshToken);
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
@@ -79,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     isLoading,
     login,
