@@ -71,7 +71,7 @@ interface DetailedNotification {
   updatedAt: Date;
 }
 
-function Notifications() {
+export default function Notifications() {
   const navigate = useNavigate();
   const {
     notifications,
@@ -536,5 +536,3 @@ function Notifications() {
     </DashboardLayout>
   );
 }
-
-export default Notifications;

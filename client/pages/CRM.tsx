@@ -278,7 +278,7 @@ function PipelineListView({
   );
 }
 
-function CRM() {
+export default function CRM() {
   const [activeTab, setActiveTab] = useState("clients");
   const [showClientForm, setShowClientForm] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);

@@ -61,7 +61,7 @@ interface Document {
   updatedAt: string;
 }
 
-function Billing() {
+export default function Billing() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
@@ -472,5 +472,3 @@ function Billing() {
     </div>
   );
 }
-
-export default Billing;

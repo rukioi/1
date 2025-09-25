@@ -97,7 +97,7 @@ import {
 } from "@/components/ui/dialog";
 import { UserManagement } from "@/components/Settings/UserManagement";
 
-function Settings() {
+export default function Settings() {
   const [activeTab, setActiveTab] = useState("company");
 
   // Create safe dialog handlers
