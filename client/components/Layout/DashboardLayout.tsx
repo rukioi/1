@@ -91,7 +91,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   // Filter navigation based on user account type
   useEffect(() => {
     if (user?.accountType) {
-      const filteredNavigation = allNavigation.filter(item => 
+      const filteredNavigation = allNavigation.filter(item =>
         item.requiredAccountTypes.includes(user.accountType)
       );
       setNavigation(filteredNavigation);
@@ -285,3 +285,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     </div>
   );
 }
+
+export { DashboardLayout };
+export default DashboardLayout;
